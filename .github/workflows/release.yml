@@ -16,7 +16,7 @@ jobs:
           docker run --rm -v "$PWD:/src" -w /src python:3.10-slim bash -c "
             apt update &&
             apt install -y gcc libffi-dev libssl-dev build-essential python3-pip &&
-            pip install pyinstaller &&
+            pip install pyinstaller requests &&
             pyinstaller --onefile fetch_and_run.py &&
             mkdir -p /src/release &&
             cp dist/fetch_and_run /src/release/

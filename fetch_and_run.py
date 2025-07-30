@@ -8,6 +8,18 @@ REPO_USER = "4D4937"
 REPO_NAME = "k8s"
 REPO_BRANCH = "main"
 
+def list_scripts():
+    api_url = f"https://api.github.com/repos/{REPO_USER}/{REPO_NAME}/contents?ref={REPO_BRANCH}"
+    response = requests.get(api_url)
+
+    if response.status_code == 200:
+        print("Available scripts in the repository:")
+        for item in response.json():
+            if item['type'] == 'file':
+                print(f"  - {item['name']}")
+    else:
+        print(f"Failed to fetch file list (HTTP {response.status_code})")
+
 def download_script(script_name):
     url = f"https://raw.githubusercontent.com/{REPO_USER}/{REPO_NAME}/{REPO_BRANCH}/{script_name}"
     print(f"Fetching script from: {url}")
@@ -31,17 +43,21 @@ def confirm_and_execute(script_file):
 
 def main():
     if len(sys.argv) != 2:
-        print("Usage: python3 fetch_and_run.py <script_name>")
-        print("Example: python3 fetch_and_run.py d.sh")
+        print("Usage:")
+        print("  python3 fetch_and_run.py <script_name>   # Download and run a script")
+        print("  python3 fetch_and_run.py list            # List available scripts")
         sys.exit(1)
 
-    script_name = sys.argv[1]
-    try:
-        local_file = download_script(script_name)
-        confirm_and_execute(local_file)
-    except FileNotFoundError as e:
-        print(f"Error: {e}")
-        sys.exit(1)
+    arg = sys.argv[1]
+    if arg == "list":
+        list_scripts()
+    else:
+        try:
+            local_file = download_script(arg)
+            confirm_and_execute(local_file)
+        except FileNotFoundError as e:
+            print(f"Error: {e}")
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()

@@ -1,14 +1,14 @@
-name: Manual Build & Release Binary
+name: Manual Build Binary
 
 on:
-  workflow_dispatch:  # 👈 手动触发
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -25,12 +25,8 @@ jobs:
           mkdir release
           cp dist/fetch_and_run release/
 
-      - name: Create GitHub Release (if not exists)
-        id: create_release
-        uses: softprops/action-gh-release@v2
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: manual-release
-          name: Manual Release
-          files: release/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: fetch-and-run
+          path: release/fetch_and_run

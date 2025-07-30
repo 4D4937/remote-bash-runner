@@ -1,4 +1,4 @@
-name: Manual Build Binary
+name: Docker Build & Downloadable Binary
 
 on:
   workflow_dispatch:
@@ -11,22 +11,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-
-      - name: Install PyInstaller
-        run: pip install pyinstaller
-
-      - name: Build binary
+      - name: Build binary in Docker
         run: |
-          pyinstaller --onefile fetch_and_run.py
-          mkdir release
-          cp dist/fetch_and_run release/
+          docker run --rm -v "$PWD:/src" -w /src python:3.10-slim bash -c "
+            apt update &&
+            apt install -y gcc libffi-dev libssl-dev build-essential python3-pip &&
+            pip install pyinstaller &&
+            pyinstaller --onefile fetch_and_run.py &&
+            mkdir -p /src/release &&
+            cp dist/fetch_and_run /src/release/
+          "
 
-      - name: Upload Artifact
+      - name: Upload binary as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fetch-and-run
+          name: fetch_and_run
           path: release/fetch_and_run
